@@ -222,6 +222,8 @@ public class JsonReader implements Closeable {
   private static final int PEEKED_SINGLE_QUOTED = 8;
   private static final int PEEKED_DOUBLE_QUOTED = 9;
   private static final int PEEKED_UNQUOTED = 10;
+  private static final int INITIAL_STACK_SIZE = 32;
+  private static final int NON_EXECUTE_PREFIX_LENGTH = 5;
 
   /** When this is returned, the string value is stored in peekedString. */
   private static final int PEEKED_BUFFERED = 11;
@@ -291,7 +293,7 @@ public class JsonReader implements Closeable {
   private String peekedString;
 
   /** The nesting stack. Using a manual array rather than an ArrayList saves 20%. */
-  private int[] stack = new int[32];
+  private int[] stack = new int[INITIAL_STACK_SIZE];
 
   private int stackSize = 0;
 
@@ -307,8 +309,8 @@ public class JsonReader implements Closeable {
    * that array. Otherwise the value is undefined, and we take advantage of that
    * by incrementing pathIndices when doing so isn't useful.
    */
-  private String[] pathNames = new String[32];
-  private int[] pathIndices = new int[32];
+  private String[] pathNames = new String[INITIAL_STACK_SIZE];
+  private int[] pathIndices = new int[INITIAL_STACK_SIZE];
 
   /** Creates a new instance that reads a JSON-encoded stream from {@code in}. */
   public JsonReader(Reader in) {
@@ -1835,7 +1837,7 @@ public class JsonReader implements Closeable {
     int unused = nextNonWhitespace(true);
     pos--;
 
-    if (pos + 5 > limit && !fillBuffer(5)) {
+    if (pos + NON_EXECUTE_PREFIX_LENGTH > limit && !fillBuffer(NON_EXECUTE_PREFIX_LENGTH)) {
       return;
     }
 
