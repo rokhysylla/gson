@@ -458,10 +458,7 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not the beginning of an array.
    */
   public void beginArray() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     if (p == PEEKED_BEGIN_ARRAY) {
       push(JsonScope.EMPTY_ARRAY);
       pathIndices[stackSize - 1] = 0;
@@ -478,10 +475,8 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not the end of an array.
    */
   public void endArray() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
+
     if (p == PEEKED_END_ARRAY) {
       stackSize--;
       pathIndices[stackSize - 1]++;
@@ -498,10 +493,8 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not the beginning of an object.
    */
   public void beginObject() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
+
     if (p == PEEKED_BEGIN_OBJECT) {
       push(JsonScope.EMPTY_OBJECT);
       peeked = PEEKED_NONE;
@@ -517,10 +510,7 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not the end of an object.
    */
   public void endObject() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     if (p == PEEKED_END_OBJECT) {
       stackSize--;
       pathNames[stackSize] = null; // Free the last path name so that it can be garbage collected!
@@ -533,19 +523,13 @@ public class JsonReader implements Closeable {
 
   /** Returns true if the current array or object has another element. */
   public boolean hasNext() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     return p != PEEKED_END_OBJECT && p != PEEKED_END_ARRAY && p != PEEKED_EOF;
   }
 
   /** Returns the type of the next token without consuming it. */
   public JsonToken peek() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
 
     switch (p) {
       case PEEKED_BEGIN_OBJECT:
@@ -925,10 +909,7 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not a property name.
    */
   public String nextName() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     String result;
     if (p == PEEKED_UNQUOTED_NAME) {
       result = nextUnquotedValue();
@@ -1289,6 +1270,21 @@ public class JsonReader implements Closeable {
     return p == PEEKED_NONE ? doPeek() : p;
   }
 
+  private String consumeNumericLiteralAsString(int p, String expectedType) throws IOException {
+    if (p == PEEKED_NUMBER) {
+      peekedString = new String(buffer, pos, peekedNumberLength);
+      pos += peekedNumberLength;
+    } else if (p == PEEKED_SINGLE_QUOTED || p == PEEKED_DOUBLE_QUOTED) {
+      peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
+    } else if (p == PEEKED_UNQUOTED) {
+      peekedString = nextUnquotedValue();
+    } else if (p != PEEKED_BUFFERED) {
+      throw unexpectedTokenError(expectedType);
+    }
+    peeked = PEEKED_BUFFERED;
+    return peekedString;
+  }
+
   /**
    * Returns the {@link JsonToken#NUMBER int} value of the next token, consuming it. If the next
    * token is a string, this method will attempt to parse it as an int. If the next token's numeric
@@ -1310,34 +1306,19 @@ public class JsonReader implements Closeable {
       pathIndices[stackSize - 1]++;
       return result;
     }
+    String numberAsString = consumeNumericLiteralAsString(p, "an int");
 
-    if (p == PEEKED_NUMBER) {
-      peekedString = new String(buffer, pos, peekedNumberLength);
-      pos += peekedNumberLength;
-    } else if (p == PEEKED_SINGLE_QUOTED || p == PEEKED_DOUBLE_QUOTED || p == PEEKED_UNQUOTED) {
-      if (p == PEEKED_UNQUOTED) {
-        peekedString = nextUnquotedValue();
-      } else {
-        peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
+    try {
+      result = Integer.parseInt(numberAsString);
+    } catch (NumberFormatException ignored) {
+      double asDouble = Double.parseDouble(numberAsString);
+      result = (int) asDouble;
+      if (result != asDouble) {
+        throw new NumberFormatException(
+                "Expected an int but was " + numberAsString + locationString());
       }
-      try {
-        result = Integer.parseInt(peekedString);
-        peeked = PEEKED_NONE;
-        pathIndices[stackSize - 1]++;
-        return result;
-      } catch (NumberFormatException ignored) {
-        // Fall back to parse as a double below.
-      }
-    } else {
-      throw unexpectedTokenError("an int");
     }
 
-    peeked = PEEKED_BUFFERED;
-    double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
-    result = (int) asDouble;
-    if (result != asDouble) { // Make sure no precision was lost casting to 'int'.
-      throw new NumberFormatException("Expected an int but was " + peekedString + locationString());
-    }
     peekedString = null;
     peeked = PEEKED_NONE;
     pathIndices[stackSize - 1]++;
