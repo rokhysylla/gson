@@ -1029,10 +1029,7 @@ public class JsonReader implements Closeable {
    *     not {@link #setStrictness(Strictness) lenient}.
    */
   public double nextDouble() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
 
     if (p == PEEKED_LONG) {
       peeked = PEEKED_NONE;
@@ -1072,10 +1069,7 @@ public class JsonReader implements Closeable {
    *     exactly represented as a long.
    */
   public long nextLong() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
 
     if (p == PEEKED_LONG) {
       peeked = PEEKED_NONE;
