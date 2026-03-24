@@ -951,10 +951,7 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not a string.
    */
   public String nextString() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     String result;
     if (p == PEEKED_UNQUOTED) {
       result = nextUnquotedValue();
@@ -984,10 +981,7 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not a boolean.
    */
   public boolean nextBoolean() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     if (p == PEEKED_TRUE) {
       peeked = PEEKED_NONE;
       pathIndices[stackSize - 1]++;
@@ -1006,10 +1000,7 @@ public class JsonReader implements Closeable {
    * @throws IllegalStateException if the next token is not a JSON null.
    */
   public void nextNull() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
+    int p = peekIfNecessary();
     if (p == PEEKED_NULL) {
       peeked = PEEKED_NONE;
       pathIndices[stackSize - 1]++;
