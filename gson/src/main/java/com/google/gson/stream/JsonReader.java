@@ -1299,6 +1299,11 @@ public class JsonReader implements Closeable {
     } while (fillBuffer(1));
   }
 
+  private int peekIfNecessary() throws IOException {
+    int p = peeked;
+    return p == PEEKED_NONE ? doPeek() : p;
+  }
+
   /**
    * Returns the {@link JsonToken#NUMBER int} value of the next token, consuming it. If the next
    * token is a string, this method will attempt to parse it as an int. If the next token's numeric
@@ -1309,11 +1314,7 @@ public class JsonReader implements Closeable {
    *     exactly represented as an int.
    */
   public int nextInt() throws IOException {
-    int p = peeked;
-    if (p == PEEKED_NONE) {
-      p = doPeek();
-    }
-
+    int p = peekIfNecessary();
     int result;
     if (p == PEEKED_LONG) {
       result = (int) peekedLong;
@@ -1852,7 +1853,7 @@ public class JsonReader implements Closeable {
     }
 
     // we consumed a security token!
-    pos += 5;
+    pos += NON_EXECUTE_PREFIX_LENGTH;
   }
 
   static {
