@@ -574,16 +574,16 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
 
     @SuppressWarnings("ReferenceEquality")
     final Node<K, V> nextNode() {
-      Node<K, V> e = next;
-      if (e == header) {
+      Node<K, V> nextNode = next;
+      if (nextNode == header) {
         throw new NoSuchElementException();
       }
       if (modCount != expectedModCount) {
         throw new ConcurrentModificationException();
       }
-      next = e.next;
-      lastReturned = e;
-      return e;
+      next = nextNode.next;
+      lastReturned = nextNode;
+      return nextNode;
     }
 
     @Override

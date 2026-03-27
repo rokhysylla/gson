@@ -1009,22 +1009,14 @@ public class JsonReader implements Closeable {
       return (double) peekedLong;
     }
 
-    if (p == PEEKED_NUMBER) {
-      peekedString = new String(buffer, pos, peekedNumberLength);
-      pos += peekedNumberLength;
-    } else if (p == PEEKED_SINGLE_QUOTED || p == PEEKED_DOUBLE_QUOTED) {
-      peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
-    } else if (p == PEEKED_UNQUOTED) {
-      peekedString = nextUnquotedValue();
-    } else if (p != PEEKED_BUFFERED) {
-      throw unexpectedTokenError("a double");
-    }
+    String numberAsString = consumeNumericLiteralAsString(p, "a double");
+    double result = Double.parseDouble(numberAsString);
 
-    peeked = PEEKED_BUFFERED;
-    double result = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
-    if (strictness != Strictness.LENIENT && (Double.isNaN(result) || Double.isInfinite(result))) {
+    if (strictness != Strictness.LENIENT
+            && (Double.isNaN(result) || Double.isInfinite(result))) {
       throw syntaxError("JSON forbids NaN and infinities: " + result);
     }
+
     peekedString = null;
     peeked = PEEKED_NONE;
     pathIndices[stackSize - 1]++;
@@ -1049,37 +1041,26 @@ public class JsonReader implements Closeable {
       return peekedLong;
     }
 
-    if (p == PEEKED_NUMBER) {
-      peekedString = new String(buffer, pos, peekedNumberLength);
-      pos += peekedNumberLength;
-    } else if (p == PEEKED_SINGLE_QUOTED || p == PEEKED_DOUBLE_QUOTED || p == PEEKED_UNQUOTED) {
-      if (p == PEEKED_UNQUOTED) {
-        peekedString = nextUnquotedValue();
-      } else {
-        peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
-      }
-      try {
-        long result = Long.parseLong(peekedString);
-        peeked = PEEKED_NONE;
-        pathIndices[stackSize - 1]++;
-        return result;
-      } catch (NumberFormatException ignored) {
-        // Fall back to parse as a double below.
-      }
-    } else {
-      throw unexpectedTokenError("a long");
-    }
+    String numberAsString = consumeNumericLiteralAsString(p, "a long");
 
-    peeked = PEEKED_BUFFERED;
-    double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
-    long result = (long) asDouble;
-    if (result != asDouble) { // Make sure no precision was lost casting to 'long'.
-      throw new NumberFormatException("Expected a long but was " + peekedString + locationString());
+    try {
+      long result = Long.parseLong(numberAsString);
+      peekedString = null;
+      peeked = PEEKED_NONE;
+      pathIndices[stackSize - 1]++;
+      return result;
+    } catch (NumberFormatException ignored) {
+      double asDouble = Double.parseDouble(numberAsString);
+      long result = (long) asDouble;
+      if (result != asDouble) {
+        throw new NumberFormatException(
+                "Expected a long but was " + numberAsString + locationString());
+      }
+      peekedString = null;
+      peeked = PEEKED_NONE;
+      pathIndices[stackSize - 1]++;
+      return result;
     }
-    peekedString = null;
-    peeked = PEEKED_NONE;
-    pathIndices[stackSize - 1]++;
-    return result;
   }
 
   /**
