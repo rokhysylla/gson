@@ -40,9 +40,8 @@ import java.util.Set;
  *
  * <p>This implementation was derived from Android 4.1's TreeMap class.
  */
-@SuppressWarnings("serial") // ignore warning about missing serialVersionUID
 public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Serializable {
-  @SuppressWarnings({"unchecked", "rawtypes"}) // to avoid Comparable<Comparable<Comparable<...>>>
+
   private static final Comparator<Comparable> NATURAL_ORDER =
       new Comparator<Comparable>() {
         @Override
@@ -50,7 +49,8 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
           return a.compareTo(b);
         }
       };
-
+  private static final String NULL_KEY_MESSAGE = "key == null";
+  private static final String NULL_VALUE_MESSAGE = "value == null";
   private final Comparator<? super K> comparator;
   private final boolean allowNullValues;
   Node<K, V> root;
@@ -115,10 +115,10 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
   @Override
   public V put(K key, V value) {
     if (key == null) {
-      throw new NullPointerException("key == null");
+      throw new NullPointerException(NULL_KEY_MESSAGE);
     }
     if (value == null && !allowNullValues) {
-      throw new NullPointerException("value == null");
+      throw new NullPointerException(NULL_VALUE_MESSAGE);
     }
     Node<K, V> created = find(key, true);
     V result = created.value;
@@ -228,9 +228,9 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
    * {@code remove()} and {@code contains()} will violate the collections API.
    */
   Node<K, V> findByEntry(Entry<?, ?> entry) {
-    Node<K, V> mine = findByObject(entry.getKey());
-    boolean valuesEqual = mine != null && equal(mine.value, entry.getValue());
-    return valuesEqual ? mine : null;
+    Node<K, V> matchingNode = findByObject(entry.getKey());
+    boolean valuesEqual = matchingNode != null && equal(matchingNode.value, entry.getValue());
+    return valuesEqual ? matchingNode : null;
   }
 
   private static boolean equal(Object a, Object b) {
@@ -466,7 +466,97 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
     return result;
   }
 
-  static final class Node<K, V> implements Entry<K, V> {
+
+  class EntrySet extends AbstractSet<Entry<K, V>> {
+    @Override
+    public int size() {
+      return size;
+    }
+
+    @Override
+    public Iterator<Entry<K, V>> iterator() {
+      return new LinkedTreeMapIterator<Entry<K, V>>() {
+        @Override
+        public Entry<K, V> next() {
+          return nextNode();
+        }
+      };
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return o instanceof Entry && findByEntry((Entry<?, ?>) o) != null;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+      if (!(o instanceof Entry)) {
+        return false;
+      }
+
+      Node<K, V> node = findByEntry((Entry<?, ?>) o);
+      if (node == null) {
+        return false;
+      }
+      removeInternal(node, true);
+      return true;
+    }
+
+    @Override
+    public void clear() {
+      LinkedTreeMap.this.clear();
+    }
+  }
+
+  final class KeySet extends AbstractSet<K> {
+    @Override
+    public int size() {
+      return size;
+    }
+
+    @Override
+    public Iterator<K> iterator() {
+      return new LinkedTreeMapIterator<K>() {
+        @Override
+        public K next() {
+          return nextNode().key;
+        }
+      };
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return containsKey(o);
+    }
+
+    @Override
+    public boolean remove(Object key) {
+      return removeInternalByKey(key) != null;
+    }
+
+    @Override
+    public void clear() {
+      LinkedTreeMap.this.clear();
+    }
+  }
+
+  /**
+   * If somebody is unlucky enough to have to serialize one of these, serialize it as a
+   * LinkedHashMap so that they won't need Gson on the other side to deserialize it. Using
+   * serialization defeats our DoS defence, so most apps shouldn't use it.
+   */
+  private Object writeReplace() throws ObjectStreamException {
+    return new LinkedHashMap<>(this);
+  }
+
+  private void readObject(ObjectInputStream in) throws IOException {
+    // Don't permit directly deserializing this class; writeReplace() should have written a
+    // replacement
+    throw new InvalidObjectException("Deserialization is unsupported");
+  }
+
+
+static final class Node<K, V> implements Entry<K, V> {
     Node<K, V> parent;
     Node<K, V> left;
     Node<K, V> right;
@@ -595,93 +685,5 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
       lastReturned = null;
       expectedModCount = modCount;
     }
-  }
-
-  class EntrySet extends AbstractSet<Entry<K, V>> {
-    @Override
-    public int size() {
-      return size;
-    }
-
-    @Override
-    public Iterator<Entry<K, V>> iterator() {
-      return new LinkedTreeMapIterator<Entry<K, V>>() {
-        @Override
-        public Entry<K, V> next() {
-          return nextNode();
-        }
-      };
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      return o instanceof Entry && findByEntry((Entry<?, ?>) o) != null;
-    }
-
-    @Override
-    public boolean remove(Object o) {
-      if (!(o instanceof Entry)) {
-        return false;
-      }
-
-      Node<K, V> node = findByEntry((Entry<?, ?>) o);
-      if (node == null) {
-        return false;
-      }
-      removeInternal(node, true);
-      return true;
-    }
-
-    @Override
-    public void clear() {
-      LinkedTreeMap.this.clear();
-    }
-  }
-
-  final class KeySet extends AbstractSet<K> {
-    @Override
-    public int size() {
-      return size;
-    }
-
-    @Override
-    public Iterator<K> iterator() {
-      return new LinkedTreeMapIterator<K>() {
-        @Override
-        public K next() {
-          return nextNode().key;
-        }
-      };
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      return containsKey(o);
-    }
-
-    @Override
-    public boolean remove(Object key) {
-      return removeInternalByKey(key) != null;
-    }
-
-    @Override
-    public void clear() {
-      LinkedTreeMap.this.clear();
-    }
-  }
-
-  /**
-   * If somebody is unlucky enough to have to serialize one of these, serialize it as a
-   * LinkedHashMap so that they won't need Gson on the other side to deserialize it. Using
-   * serialization defeats our DoS defence, so most apps shouldn't use it.
-   */
-  private Object writeReplace() throws ObjectStreamException {
-    return new LinkedHashMap<>(this);
-  }
-
-  private void readObject(ObjectInputStream in) throws IOException {
-    // Don't permit directly deserializing this class; writeReplace() should have written a
-    // replacement
-    throw new InvalidObjectException("Deserialization is unsupported");
   }
 }
