@@ -2,7 +2,7 @@
 # SYLLA ROKHAYA
 ## Introduction
 Dans la première partie du projet, nous avons réalisé une analyse du code du projet Gson à l’aide de différents outils tels que SonarQube. Cette analyse nous a permis d’identifier plusieurs points d’amélioration, notamment en termes de lisibilité, de structure du code, de complexité des méthodes et de couverture des tests.
-L’objectif de cette seconde partie est de proposer et de mettre en œuvre des améliorations concrètes sur le projet.J'ai choisi de me concentrer principalement sur quelques classes du module gson, notamment JsonReader, JsonWriter et JsonParser.
+L’objectif de cette seconde partie est de proposer et de mettre en œuvre des améliorations concrètes sur le projet.J'ai choisi de me concentrer principalement sur quelques classes du module gson.
 Les modifications proposées couvrent différents niveaux de complexité :
 
 - des améliorations simples (suppression de nombres magiques, renommage, nettoyage du code),
@@ -18,8 +18,10 @@ et l’impact de cette amélioration.
 Enfin, une attention particulière sera portée sur ce qu'on a appris en termes de qualité logicielle et de
 développement, ainsi qu’à la validation via les tests et les outils d’analyse.
 
-## Petite modification dans JsonReader
-Plusieurs méthodes de JsonReader, comme nextInt, nextLong, nextDouble, nextXXX et peek, commençaient par la même logique: vérifier si peeked vaut PEEKED_NONE, puis appeler doPeek() si nécessaire.
+## Petite modification dans JsonReader.
+
+## Moyenne modification dans JsonReader
+Plusieurs méthodes de JsonReader, comme nextInt(), nextLong(), nextDouble(), nextXXX et peek(), commençaient par la même logique: vérifier si peeked vaut PEEKED_NONE, puis appeler doPeek() si nécessaire.
 Problème
 Cette duplication entraîne :
 une lisibilité réduite,
@@ -27,5 +29,32 @@ une maintenance plus difficile,
 un risque d’incohérence si une modification est faite dans une méthode mais pas dans les autres.
 Modification
 
-J'ai factorisé la logique commune en introduisant une methodes utilitaires **peekIfNecessary()**
+J'ai factorisé la logique commune en introduisant une methodes utilitaires **peekIfNecessary()** et en l'appelant dans chacune des méthodes ou figuraiit la duplication
 On a une meilleure lisibilité, réduction de la duplication, centralisation d’une logique commune simple.
+
+`Factorisation de la méthode doPeek()`
+La méthode doPeek() était hyper longue et concentrait plusieurs responsabilités :traitement spécifique des objets et tableaux, validation syntaxique et lecture du prochain token.
+
+Cette méthode présentait une complexité importante, ce qui rendait sa lecture et sa maintenance difficiles.J'ai essayé de modifié en partant sur la meme idée mais c'était un peu  risquée à cause de la densité de la logique.
+
+Du coup,J’ai refactorisé doPeek() en extrayant plusieurs méthodes privées :
+
+une méthode pour traiter le scope courant ;
+une méthode dédiée au cas des objets ;
+une méthode chargée de lire la prochaine valeur.
+
+Maintenant on a :
+une réduction de la complexité de la méthode principale ;
+une meilleure séparation des responsabilités ;
+un code  plus lisible ;
+
+## Petite modification sur LinkedTreeMap
+
+Dans la classe LinkedTreeMap, certaines variables locales possèdent des noms peu explicites, comme mine ou e, ce qui rend la lecture du code plus difficile.
+Ces noms ne permettent pas de comprendre immédiatement le rôle des variables, ce qui complique la compréhension d’une classe déjà technique.
+Renommage de :
+mine -> matchingNode
+e -> nextNode
+On a une compréhension plus rapide du code maintenant.
+`Regroupment de certaines méthodes`
+J'ai réorganiser certaines classes internes les uns pret des autres vu qu'elles participent à la même fonctionnalité (EntrySet et KeySet).
