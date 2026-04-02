@@ -17,3 +17,15 @@ et l’impact de cette amélioration.
 
 Enfin, une attention particulière sera portée sur ce qu'on a appris en termes de qualité logicielle et de
 développement, ainsi qu’à la validation via les tests et les outils d’analyse.
+
+## Petite modification dans JsonReader
+Plusieurs méthodes de JsonReader, comme nextInt, nextLong, nextDouble, nextXXX et peek, commençaient par la même logique: vérifier si peeked vaut PEEKED_NONE, puis appeler doPeek() si nécessaire.
+Problème
+Cette duplication entraîne :
+une lisibilité réduite,
+une maintenance plus difficile,
+un risque d’incohérence si une modification est faite dans une méthode mais pas dans les autres.
+Modification
+
+J'ai factorisé la logique commune en introduisant une methodes utilitaires **peekIfNecessary()**
+On a une meilleure lisibilité, réduction de la duplication, centralisation d’une logique commune simple.
