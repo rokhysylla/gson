@@ -1,9 +1,5 @@
 package com.google.gson;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
-
 /**
  * Utility class for converting Java values to non-null {@link JsonElement} instances.
  *
