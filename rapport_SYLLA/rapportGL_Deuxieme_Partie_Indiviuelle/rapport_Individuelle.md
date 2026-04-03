@@ -50,11 +50,34 @@ un code  plus lisible ;
 
 ## Petite modification sur LinkedTreeMap
 
+` Renommage des variable e et mine `
 Dans la classe LinkedTreeMap, certaines variables locales possèdent des noms peu explicites, comme mine ou e, ce qui rend la lecture du code plus difficile.
 Ces noms ne permettent pas de comprendre immédiatement le rôle des variables, ce qui complique la compréhension d’une classe déjà technique.
 Renommage de :
 mine -> matchingNode
 e -> nextNode
 On a une compréhension plus rapide du code maintenant.
+
 `Regroupment de certaines méthodes`
 J'ai réorganiser certaines classes internes les uns pret des autres vu qu'elles participent à la même fonctionnalité (EntrySet et KeySet).
+
+## Moyenne modification dans LikedTreeMap
+
+La méthode rebalance() concentrait l’ensemble de la logique de rééquilibrage AVL, avec plusieurs branches conditionnelles et des blocs symétriques pour les cas de déséquilibre à gauche et à droite.
+
+Cette structure rendait la méthode difficile à lire et à maintenir. La présence de calculs répétés de hauteur et de deux branches très similaires augmentait la complexité de la méthode.
+
+J'ai refactorisé la méthode en extrayant :
+
+une méthode utilitaire pour récupérer la hauteur d’un nœud ;
+une méthode dédiée au cas de déséquilibre à droite ;
+une méthode dédiée au cas de déséquilibre à gauche.
+Bénéfices
+On a maintenant une 
+réduction de la complexité de la méthode principale 
+meilleure séparation des cas de rééquilibrage 
+suppression d’une partie de la duplication 
+
+
+
+
