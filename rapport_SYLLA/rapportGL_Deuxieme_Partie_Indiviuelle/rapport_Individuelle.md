@@ -21,6 +21,8 @@ développement, ainsi qu’à la validation via les tests et les outils d’anal
 ## Petite modification dans JsonReader.
 
 ## Moyenne modification dans JsonReader
+https://github.com/rokhysylla/gson/blob/main/gson/src/main/java/com/google/gson/stream/JsonReader.java
+
 Plusieurs méthodes de JsonReader, comme nextInt(), nextLong(), nextDouble(), nextXXX et peek(), commençaient par la même logique: vérifier si peeked vaut PEEKED_NONE, puis appeler doPeek() si nécessaire.
 Problème
 Cette duplication entraîne :
@@ -62,6 +64,7 @@ On a une compréhension plus rapide du code maintenant.
 J'ai réorganiser certaines classes internes les uns pret des autres vu qu'elles participent à la même fonctionnalité (EntrySet et KeySet).
 
 ## Moyenne modification dans LikedTreeMap
+https://github.com/rokhysylla/gson/commit/e21a8a1379a5dbe8a150de953fa233bb69bf7e1e
 
 La méthode rebalance() concentrait l’ensemble de la logique de rééquilibrage AVL, avec plusieurs branches conditionnelles et des blocs symétriques pour les cas de déséquilibre à gauche et à droite.
 
@@ -73,11 +76,35 @@ une méthode utilitaire pour récupérer la hauteur d’un nœud ;
 une méthode dédiée au cas de déséquilibre à droite ;
 une méthode dédiée au cas de déséquilibre à gauche.
 Bénéfices
-On a maintenant une 
+On a maintenant une
 réduction de la complexité de la méthode principale 
 meilleure séparation des cas de rééquilibrage 
 suppression d’une partie de la duplication 
 
+## Grande modification dans JsonReader
 
+## Moyenne modification dans JsonElement
+Plusieurs méthodes de conversion de JsonElement, comme getAsString(), getAsInt() ou getAsBoolean(), lançaient chacune une exception UnsupportedOperationException construite de manière identique.
+
+Cette répétition introduisait une duplication inutile et alourdissait la classe.
+
+Une méthode privée a été  ajoutée **unsupportedConversion()** pour centraliser la création de cette exception, puis les méthodes concernées ont été simplifiées en l’utilisant.
+On a maintenant code plus lisible et une suppression de duplication
+
+## Grande modification dans JsonArray et JsonObject
+Les classes JsonObject et JsonArray contenaient plusieurs méthodes répétant la même logique de conversion des valeurs Java vers JsonElement, notamment pour gérer les valeurs null et la création de JsonPrimitive.
+
+Cette duplication alourdissait le code et augmentait le risque d’incohérence entre les différentes méthodes.
+
+Une classe utilitaire JsonElementConversion a été introduite pour centraliser :
+
+la conversion de String, Number, Boolean et Character vers JsonElement,
+la normalisation des références JsonElement nulles vers JsonNull.INSTANCE.
+
+Les méthodes de JsonObject et JsonArray ont ensuite été simplifiées pour utiliser cette nouvelle classe.
+
+On a maintenant une :
+suppression de duplication dans plusieurs classes ;
+centralisation d’une responsabilité commune ;
 
 
