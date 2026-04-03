@@ -67,7 +67,7 @@ public final class JsonObject extends JsonElement {
    * @param value the member object.
    */
   public void add(String property, JsonElement value) {
-    members.put(property, value == null ? JsonNull.INSTANCE : value);
+    members.put(property, JsonElementConversion.nonNull(value));
   }
 
   /**
@@ -91,7 +91,7 @@ public final class JsonObject extends JsonElement {
    * @param value the string value associated with the member.
    */
   public void addProperty(String property, String value) {
-    add(property, value == null ? JsonNull.INSTANCE : new JsonPrimitive(value));
+    add(property, JsonElementConversion.toJsonElement(value));
   }
 
   /**
@@ -102,7 +102,7 @@ public final class JsonObject extends JsonElement {
    * @param value the number value associated with the member.
    */
   public void addProperty(String property, Number value) {
-    add(property, value == null ? JsonNull.INSTANCE : new JsonPrimitive(value));
+    add(property, JsonElementConversion.toJsonElement(value));
   }
 
   /**
@@ -113,8 +113,7 @@ public final class JsonObject extends JsonElement {
    * @param value the boolean value associated with the member.
    */
   public void addProperty(String property, Boolean value) {
-    add(property, value == null ? JsonNull.INSTANCE : new JsonPrimitive(value));
-  }
+    add(property, JsonElementConversion.toJsonElement(value));  }
 
   /**
    * Convenience method to add a char member. The specified value is converted to a {@link
@@ -124,8 +123,7 @@ public final class JsonObject extends JsonElement {
    * @param value the char value associated with the member.
    */
   public void addProperty(String property, Character value) {
-    add(property, value == null ? JsonNull.INSTANCE : new JsonPrimitive(value));
-  }
+    add(property, JsonElementConversion.toJsonElement(value));  }
 
   /**
    * Returns a set of members of this object. The set is ordered, and the order is in which the

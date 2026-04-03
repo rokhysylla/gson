@@ -84,7 +84,8 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    * @since 2.4
    */
   public void add(Boolean bool) {
-    elements.add(bool == null ? JsonNull.INSTANCE : new JsonPrimitive(bool));
+
+    elements.add(JsonElementConversion.toJsonElement(bool));
   }
 
   /**
@@ -94,7 +95,7 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    * @since 2.4
    */
   public void add(Character character) {
-    elements.add(character == null ? JsonNull.INSTANCE : new JsonPrimitive(character));
+    elements.add(JsonElementConversion.toJsonElement(character));
   }
 
   /**
@@ -104,7 +105,7 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    * @since 2.4
    */
   public void add(Number number) {
-    elements.add(number == null ? JsonNull.INSTANCE : new JsonPrimitive(number));
+    elements.add(JsonElementConversion.toJsonElement(number));
   }
 
   /**
@@ -114,8 +115,7 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    * @since 2.4
    */
   public void add(String string) {
-    elements.add(string == null ? JsonNull.INSTANCE : new JsonPrimitive(string));
-  }
+    elements.add(JsonElementConversion.toJsonElement(string));  }
 
   /**
    * Adds the specified element to self.
@@ -123,10 +123,7 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    * @param element the element that needs to be added to the array.
    */
   public void add(JsonElement element) {
-    if (element == null) {
-      element = JsonNull.INSTANCE;
-    }
-    elements.add(element);
+    elements.add(JsonElementConversion.nonNull(element));
   }
 
   /**
@@ -148,8 +145,7 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    */
   @CanIgnoreReturnValue
   public JsonElement set(int index, JsonElement element) {
-    return elements.set(index, element == null ? JsonNull.INSTANCE : element);
-  }
+    return elements.set(index, JsonElementConversion.nonNull(element));  }
 
   /**
    * Removes the first occurrence of the specified element from this array, if it is present. If the
