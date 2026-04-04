@@ -114,11 +114,6 @@ public class PerformanceTest {
     }
   }
 
-  /** Created in response to http://code.google.com/p/google-gson/issues/detail?id=96 */
-  @Test
-  @Ignore
-  public void testLargeCollectionSerialization() {
-    int count = 1400000;
     List<CollectionEntry> list = new ArrayList<>(count);
     for (int i = 0; i < count; ++i) {
       list.add(new CollectionEntry("name" + i, "value" + i));
@@ -366,3 +361,4 @@ public class PerformanceTest {
     }
   }
 }
+
