@@ -46,10 +46,7 @@ public abstract class UnsafeAllocator {
   public static final UnsafeAllocator INSTANCE = create();
 
   private static UnsafeAllocator create() {
-    // try JVM
-    // public class Unsafe {
-    //   public Object allocateInstance(Class<?> type);
-    // }
+
     try {
       Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
       Field f = unsafeClass.getDeclaredField("theUnsafe");
@@ -68,11 +65,7 @@ public abstract class UnsafeAllocator {
       // OK: try the next way
     }
 
-    // try dalvikvm, post-gingerbread
-    // public class ObjectStreamClass {
-    //   private static native int getConstructorId(Class<?> c);
-    //   private static native Object newInstance(Class<?> instantiationClass, int methodId);
-    // }
+
     try {
       Method getConstructorId =
           ObjectStreamClass.class.getDeclaredMethod("getConstructorId", Class.class);
@@ -93,11 +86,7 @@ public abstract class UnsafeAllocator {
       // OK: try the next way
     }
 
-    // try dalvikvm, pre-gingerbread
-    // public class ObjectInputStream {
-    //   private static native Object newInstance(
-    //     Class<?> instantiationClass, Class<?> constructorClass);
-    // }
+
     try {
       Method newInstance =
           ObjectInputStream.class.getDeclaredMethod("newInstance", Class.class, Class.class);
