@@ -28,15 +28,15 @@ import java.lang.reflect.Method;
  * @author Jesse Wilson
  */
 public abstract class UnsafeAllocator {
-  public abstract <T> T newInstance(Class<T> c) throws Exception;
+  public abstract <T> T newInstance(Class<T> targetClass) throws Exception;
 
   /**
    * Asserts that the class is instantiable. This check should have already occurred in {@link
    * ConstructorConstructor}; this check here acts as safeguard since trying to use Unsafe for
    * non-instantiable classes might crash the JVM on some devices.
    */
-  private static void assertInstantiable(Class<?> c) {
-    String exceptionMessage = ConstructorConstructor.checkInstantiable(c);
+  private static void assertInstantiable(Class<?> targetClass) {
+    String exceptionMessage = ConstructorConstructor.checkInstantiable(targetClass);
     if (exceptionMessage != null) {
       throw new AssertionError(
           "UnsafeAllocator is used for non-instantiable type: " + exceptionMessage);
@@ -49,16 +49,16 @@ public abstract class UnsafeAllocator {
 
     try {
       Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-      Field f = unsafeClass.getDeclaredField("theUnsafe");
-      f.setAccessible(true);
-      Object unsafe = f.get(null);
+      Field field = unsafeClass.getDeclaredField("theUnsafe");
+      field.setAccessible(true);
+      Object unsafe = field.get(null);
       Method allocateInstance = unsafeClass.getMethod("allocateInstance", Class.class);
       return new UnsafeAllocator() {
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T newInstance(Class<T> c) throws Exception {
-          assertInstantiable(c);
-          return (T) allocateInstance.invoke(unsafe, c);
+        public <T> T newInstance(Class<T> targetClass) throws Exception {
+          assertInstantiable(targetClass);
+          return (T) allocateInstance.invoke(unsafe, targetClass);
         }
       };
     } catch (Exception ignored) {
@@ -94,9 +94,9 @@ public abstract class UnsafeAllocator {
       return new UnsafeAllocator() {
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T newInstance(Class<T> c) throws Exception {
-          assertInstantiable(c);
-          return (T) newInstance.invoke(null, c, Object.class);
+        public <T> T newInstance(Class<T> targetClass) throws Exception {
+          assertInstantiable(targetClass);
+          return (T) newInstance.invoke(null, targetClass, Object.class);
         }
       };
     } catch (Exception ignored) {
@@ -106,10 +106,10 @@ public abstract class UnsafeAllocator {
     // give up
     return new UnsafeAllocator() {
       @Override
-      public <T> T newInstance(Class<T> c) {
+      public <T> T newInstance(Class<T> targetClass) {
         throw new UnsupportedOperationException(
             "Cannot allocate "
-                + c
+                + targetClass
                 + ". Usage of JDK sun.misc.Unsafe is enabled, but it could not be used."
                 + " Make sure your runtime is configured correctly.");
       }
