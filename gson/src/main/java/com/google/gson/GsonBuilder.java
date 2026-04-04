@@ -709,6 +709,28 @@ public final class GsonBuilder {
   }
 
   /**
+   * Verifies that the given adapter implements at least one supported interface.
+   *
+   * @param typeAdapter the adapter object to validate
+   * @param allowInstanceCreator whether {@link InstanceCreator} is allowed
+   * @throws IllegalArgumentException if the adapter does not implement a supported interface
+   */
+  private static void checkSupportedTypeAdapter(Object typeAdapter, boolean allowInstanceCreator) {
+    boolean supported =
+            typeAdapter instanceof JsonSerializer<?>
+                    || typeAdapter instanceof JsonDeserializer<?>
+                    || typeAdapter instanceof TypeAdapter<?>
+                    || (allowInstanceCreator && typeAdapter instanceof InstanceCreator<?>);
+
+    if (!supported) {
+      throw new IllegalArgumentException(
+              "Class "
+                      + typeAdapter.getClass().getName()
+                      + " does not implement any supported type adapter class or interface");
+    }
+  }
+
+  /**
    * Configures Gson for custom serialization or deserialization. This method combines the
    * registration of an {@link TypeAdapter}, {@link InstanceCreator}, {@link JsonSerializer}, and a
    * {@link JsonDeserializer}. It is best used when a single object {@code typeAdapter} implements
@@ -739,15 +761,7 @@ public final class GsonBuilder {
   public GsonBuilder registerTypeAdapter(Type type, Object typeAdapter) {
     Objects.requireNonNull(type);
     Objects.requireNonNull(typeAdapter);
-    if (!(typeAdapter instanceof JsonSerializer<?>
-        || typeAdapter instanceof JsonDeserializer<?>
-        || typeAdapter instanceof InstanceCreator<?>
-        || typeAdapter instanceof TypeAdapter<?>)) {
-      throw new IllegalArgumentException(
-          "Class "
-              + typeAdapter.getClass().getName()
-              + " does not implement any supported type adapter class or interface");
-    }
+    checkSupportedTypeAdapter(typeAdapter, true);
 
     if (hasNonOverridableAdapter(type)) {
       throw new IllegalArgumentException("Cannot override built-in adapter for " + type);
@@ -818,14 +832,7 @@ public final class GsonBuilder {
   public GsonBuilder registerTypeHierarchyAdapter(Class<?> baseType, Object typeAdapter) {
     Objects.requireNonNull(baseType);
     Objects.requireNonNull(typeAdapter);
-    if (!(typeAdapter instanceof JsonSerializer<?>
-        || typeAdapter instanceof JsonDeserializer<?>
-        || typeAdapter instanceof TypeAdapter<?>)) {
-      throw new IllegalArgumentException(
-          "Class "
-              + typeAdapter.getClass().getName()
-              + " does not implement any supported type adapter class or interface");
-    }
+    checkSupportedTypeAdapter(typeAdapter, false);
 
     if (typeAdapter instanceof JsonDeserializer || typeAdapter instanceof JsonSerializer) {
       hierarchyFactories.add(TreeTypeAdapter.newTypeHierarchyFactory(baseType, typeAdapter));
