@@ -114,3 +114,23 @@ Dans le début de la classe on voit un bloc de commentaire non javaDoc dont j'ai
 Voici le lien: https://github.com/rokhysylla/gson/commit/ca586ced1ad6e5d26583d2c44b0d944f3d1b722a
 
 ## Grande modification dans TypeAdapteur
+ 
+La classe TypeAdapter regroupait plusieurs responsabilités. Elle définissait à la fois le contrat principal d’adaptation (read et write), le mécanisme de décoration avec nullSafe(), ainsi que plusieurs méthodes utilitaires de conversion vers et depuis différents supports comme String, Reader, Writer et JsonElement.
+
+Cette concentration de responsabilités rendait la classe plus dense et moins claire. La responsabilité principale d’un TypeAdapter est de définir comment un type est lu depuis JSON et écrit vers JSON. 
+
+Maintenant ,j'ai rajouté une nouvelle classe TypeAdapterSupport pour centraliser les conversions utilitaires :
+toJson(Writer, T)
+toJson(T)
+toJsonTree(T)
+fromJson(Reader)
+fromJson(String)
+fromJsonTree(JsonElement)
+
+Les méthodes publiques correspondantes ont été conservées dans TypeAdapter pour préserver l’API existante, mais elles délèguent désormais leur logique à cette nouvelle classe.
+Maintenant On a :
+séparation plus claire des responsabilités ;
+classe TypeAdapter allégée ;
+meilleure lisibilité ;
+architecture plus modulaire ;
+maintenance facilitée.
