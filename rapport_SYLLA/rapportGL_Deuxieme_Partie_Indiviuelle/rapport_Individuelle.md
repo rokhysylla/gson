@@ -119,7 +119,7 @@ La classe TypeAdapter regroupait plusieurs responsabilités. Elle définissait �
 
 Cette concentration de responsabilités rendait la classe plus dense et moins claire. La responsabilité principale d’un TypeAdapter est de définir comment un type est lu depuis JSON et écrit vers JSON. 
 
-Maintenant ,j'ai rajouté une nouvelle classe TypeAdapterSupport pour centraliser les conversions utilitaires :
+Maintenant ,j'ai rajouté une nouvelle classe TypeAdapterSupport(lien:https://github.com/rokhysylla/gson/commit/20aef486a1c501efadd850e4e7aaa9335a373755) pour centraliser les conversions utilitaires :
 toJson(Writer, T)
 toJson(T)
 toJsonTree(T)
@@ -127,7 +127,7 @@ fromJson(Reader)
 fromJson(String)
 fromJsonTree(JsonElement)
 
-Les méthodes publiques correspondantes ont été conservées dans TypeAdapter pour préserver l’API existante, mais elles délèguent désormais leur logique à cette nouvelle classe.
+Les méthodes publiques correspondantes ont été conservées dans TypeAdapter pour préserver l’API existante, mais elles délèguent désormais leur logique à cette nouvelle classe(lien: https://github.com/rokhysylla/gson/commit/3d48f57d90eb613f23b8ed2e6bcd0686826586fc).
 Maintenant On a :
 séparation plus claire des responsabilités ;
 classe TypeAdapter allégée ;
