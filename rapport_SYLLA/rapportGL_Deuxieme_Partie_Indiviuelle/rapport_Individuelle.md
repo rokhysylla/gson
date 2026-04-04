@@ -92,11 +92,13 @@ Une méthode privée a été  ajoutée **unsupportedConversion()** pour centrali
 On a maintenant code plus lisible et une suppression de duplication
 
 ## Grande modification dans JsonArray et JsonObject
+https://github.com/rokhysylla/gson/commit/228c673cee4c86407d930d7b6f546e0685463b93
+https://github.com/rokhysylla/gson/commit/228c673cee4c86407d930d7b6f546e0685463b93#diff-5cb391df45caeea8034daf10cb6c490e907a94fd8c690d8961c2144dffa110c7
 Les classes JsonObject et JsonArray contenaient plusieurs méthodes répétant la même logique de conversion des valeurs Java vers JsonElement, notamment pour gérer les valeurs null et la création de JsonPrimitive.
 
 Cette duplication alourdissait le code et augmentait le risque d’incohérence entre les différentes méthodes.
 
-Une classe utilitaire JsonElementConversion a été introduite pour centraliser :
+Une classe utilitaire JsonElementConversion(lien:https://github.com/rokhysylla/gson/blob/main/gson/src/main/java/com/google/gson/JsonElementConversion.java) a été introduite pour centraliser :
 
 la conversion de String, Number, Boolean et Character vers JsonElement,
 la normalisation des références JsonElement nulles vers JsonNull.INSTANCE.
@@ -107,4 +109,8 @@ On a maintenant une :
 suppression de duplication dans plusieurs classes ;
 centralisation d’une responsabilité commune ;
 
+## Petite modification dans TypeAdapteur
+Dans le début de la classe on voit un bloc de commentaire non javaDoc dont j'ai du suprrimer pour une meilleure lisibilité et aussi diminuer le nombre totale de ligne de commentaire sur cette classe.
+Voici le lien: https://github.com/rokhysylla/gson/commit/ca586ced1ad6e5d26583d2c44b0d944f3d1b722a
 
+## Grande modification dans TypeAdapteur
