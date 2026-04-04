@@ -111,6 +111,14 @@ public abstract class TypeAdapter<T> {
   public abstract void write(JsonWriter out, T value) throws IOException;
 
   /**
+   * Reads one JSON value (an array, object, string, number, boolean or null) and converts it to a
+   * Java object. Returns the converted object.
+   *
+   * @return the converted Java object. May be {@code null}.
+   */
+  public abstract T read(JsonReader in) throws IOException;
+
+  /**
    * Converts {@code value} to a JSON document and writes it to {@code out}.
    *
    * <p>A {@link JsonWriter} with default configuration is used for writing the JSON data. To
@@ -121,8 +129,7 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final void toJson(Writer out, T value) throws IOException {
-    JsonWriter writer = new JsonWriter(out);
-    write(writer, value);
+    TypeAdapterSupport.toJson(this, out, value);
   }
 
   /**
@@ -138,13 +145,7 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final String toJson(T value) {
-    StringBuilder stringBuilder = new StringBuilder();
-    try {
-      toJson(Streams.writerForAppendable(stringBuilder), value);
-    } catch (IOException e) {
-      throw new JsonIOException(e);
-    }
-    return stringBuilder.toString();
+    return TypeAdapterSupport.toJson(this, value);
   }
 
   /**
@@ -157,22 +158,9 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final JsonElement toJsonTree(T value) {
-    try {
-      JsonTreeWriter jsonWriter = new JsonTreeWriter();
-      write(jsonWriter, value);
-      return jsonWriter.get();
-    } catch (IOException e) {
-      throw new JsonIOException(e);
-    }
+    return TypeAdapterSupport.toJsonTree(this, value);
   }
 
-  /**
-   * Reads one JSON value (an array, object, string, number, boolean or null) and converts it to a
-   * Java object. Returns the converted object.
-   *
-   * @return the converted Java object. May be {@code null}.
-   */
-  public abstract T read(JsonReader in) throws IOException;
 
   /**
    * Converts the JSON document in {@code in} to a Java object.
@@ -189,8 +177,7 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final T fromJson(Reader in) throws IOException {
-    JsonReader reader = new JsonReader(in);
-    return read(reader);
+    return TypeAdapterSupport.fromJson(this, in);
   }
 
   /**
@@ -208,8 +195,7 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final T fromJson(String json) throws IOException {
-    return fromJson(new StringReader(json));
-  }
+    return TypeAdapterSupport.fromJson(this, json);  }
 
   /**
    * Converts {@code jsonTree} to a Java object.
@@ -220,12 +206,7 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final T fromJsonTree(JsonElement jsonTree) {
-    try {
-      JsonReader jsonReader = new JsonTreeReader(jsonTree);
-      return read(jsonReader);
-    } catch (IOException e) {
-      throw new JsonIOException(e);
-    }
+    return TypeAdapterSupport.fromJsonTree(this, jsonTree);
   }
 
   /**
