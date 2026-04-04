@@ -148,6 +148,7 @@ public final class GsonBuilder {
   ToNumberStrategy objectToNumberStrategy = DEFAULT_OBJECT_TO_NUMBER_STRATEGY;
   ToNumberStrategy numberToNumberStrategy = DEFAULT_NUMBER_TO_NUMBER_STRATEGY;
   final ArrayDeque<ReflectionAccessFilter> reflectionFilters = new ArrayDeque<>();
+  private static final int MAX_DATE_FORMAT_STYLE = DateFormat.SHORT;
 
   /**
    * Creates a GsonBuilder instance that can be used to build Gson with various configuration
@@ -699,10 +700,9 @@ public final class GsonBuilder {
     this.datePattern = null;
     return this;
   }
-
   private static int checkDateFormatStyle(int style) {
     // Valid DateFormat styles are: 0, 1, 2, 3 (FULL, LONG, MEDIUM, SHORT)
-    if (style < 0 || style > 3) {
+    if (style < 0 || style > MAX_DATE_FORMAT_STYLE) {
       throw new IllegalArgumentException("Invalid style: " + style);
     }
     return style;
@@ -1024,18 +1024,18 @@ public final class GsonBuilder {
     return serializeSpecialFloatingPointValues ? TypeAdapters.FLOAT : TypeAdapters.FLOAT_STRICT;
   }
 
-  private void addUserDefinedAdapters(List<TypeAdapterFactory> all) {
+  private void addUserDefinedAdapters(List<TypeAdapterFactory> allFactories) {
     if (!this.factories.isEmpty()) {
       List<TypeAdapterFactory> reversedFactories = new ArrayList<>(this.factories);
       Collections.reverse(reversedFactories);
-      all.addAll(reversedFactories);
+      allFactories.addAll(reversedFactories);
     }
 
     if (!this.hierarchyFactories.isEmpty()) {
       List<TypeAdapterFactory> reversedHierarchyFactories =
           new ArrayList<>(this.hierarchyFactories);
       Collections.reverse(reversedHierarchyFactories);
-      all.addAll(reversedHierarchyFactories);
+      allFactories.addAll(reversedHierarchyFactories);
     }
   }
 
