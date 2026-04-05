@@ -385,12 +385,10 @@ public class GsonBuilderTest {
   @Test
   public void testSetDateFormatEmptyPattern() {
     GsonBuilder builder = new GsonBuilder();
-    @SuppressWarnings("JavaUtilDate")
     Date date = new Date(0);
     String originalFormatted = builder.create().toJson(date);
 
     String emptyFormatted = builder.setDateFormat("    ").create().toJson(date);
-    // Empty pattern was ignored
     assertThat(emptyFormatted).isEqualTo(originalFormatted);
   }
 
@@ -401,7 +399,6 @@ public class GsonBuilderTest {
     int[] validStyles = {DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT};
 
     for (int style : validStyles) {
-      // Should not throw an exception
       builder.setDateFormat(style);
       builder.setDateFormat(style, style);
     }
