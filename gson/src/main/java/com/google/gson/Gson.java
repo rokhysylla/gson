@@ -1074,7 +1074,7 @@ public final class Gson {
     }
 
     try {
-      JsonToken unused = reader.peek();
+      reader.peek();
       isEmpty = false;
       TypeAdapter<T> typeAdapter = getAdapter(typeOfT);
       T object = typeAdapter.read(reader);
