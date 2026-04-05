@@ -700,6 +700,7 @@ public final class GsonBuilder {
     this.datePattern = null;
     return this;
   }
+
   private static int checkDateFormatStyle(int style) {
     // Valid DateFormat styles are: 0, 1, 2, 3 (FULL, LONG, MEDIUM, SHORT)
     if (style < 0 || style > MAX_DATE_FORMAT_STYLE) {
@@ -717,16 +718,16 @@ public final class GsonBuilder {
    */
   private static void checkSupportedTypeAdapter(Object typeAdapter, boolean allowInstanceCreator) {
     boolean supported =
-            typeAdapter instanceof JsonSerializer<?>
-                    || typeAdapter instanceof JsonDeserializer<?>
-                    || typeAdapter instanceof TypeAdapter<?>
-                    || (allowInstanceCreator && typeAdapter instanceof InstanceCreator<?>);
+        typeAdapter instanceof JsonSerializer<?>
+            || typeAdapter instanceof JsonDeserializer<?>
+            || typeAdapter instanceof TypeAdapter<?>
+            || (allowInstanceCreator && typeAdapter instanceof InstanceCreator<?>);
 
     if (!supported) {
       throw new IllegalArgumentException(
-              "Class "
-                      + typeAdapter.getClass().getName()
-                      + " does not implement any supported type adapter class or interface");
+          "Class "
+              + typeAdapter.getClass().getName()
+              + " does not implement any supported type adapter class or interface");
     }
   }
 

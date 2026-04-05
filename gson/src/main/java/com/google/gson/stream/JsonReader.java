@@ -567,9 +567,9 @@ public class JsonReader implements Closeable {
   /**
    * Handles the current parsing scope before reading the next value.
    *
-   * <p>This method updates the internal stack depending on the current JSON
-   * structure (array, object, document) and may directly return a token
-   * if the structure indicates the end of a JSON element.
+   * <p>This method updates the internal stack depending on the current JSON structure (array,
+   * object, document) and may directly return a token if the structure indicates the end of a JSON
+   * element.
    *
    * @param peekStack the current parsing scope
    * @return a peeked token if determined, or {@code PEEKED_NONE} if parsing should continue
@@ -642,6 +642,7 @@ public class JsonReader implements Closeable {
 
     return PEEKED_NONE;
   }
+
   private int handleObjectScope(int peekStack) throws IOException {
     stack[stackSize - 1] = JsonScope.DANGLING_NAME;
 
@@ -689,9 +690,9 @@ public class JsonReader implements Closeable {
   /**
    * Handles the current parsing scope before reading the next value.
    *
-   * <p>This method updates the internal stack depending on the current JSON
-   * structure (array, object, document) and may directly return a token
-   * if the structure indicates the end of a JSON element.
+   * <p>This method updates the internal stack depending on the current JSON structure (array,
+   * object, document) and may directly return a token if the structure indicates the end of a JSON
+   * element.
    *
    * @param peekStack the current parsing scope
    * @return a peeked token if determined, or {@code PEEKED_NONE} if parsing should continue
@@ -1064,8 +1065,7 @@ public class JsonReader implements Closeable {
     String numberAsString = consumeNumericLiteralAsString(p, "a double");
     double result = Double.parseDouble(numberAsString);
 
-    if (strictness != Strictness.LENIENT
-            && (Double.isNaN(result) || Double.isInfinite(result))) {
+    if (strictness != Strictness.LENIENT && (Double.isNaN(result) || Double.isInfinite(result))) {
       throw syntaxError("JSON forbids NaN and infinities: " + result);
     }
 
@@ -1106,7 +1106,7 @@ public class JsonReader implements Closeable {
       long result = (long) asDouble;
       if (result != asDouble) {
         throw new NumberFormatException(
-                "Expected a long but was " + numberAsString + locationString());
+            "Expected a long but was " + numberAsString + locationString());
       }
       peekedString = null;
       peeked = PEEKED_NONE;
@@ -1299,11 +1299,11 @@ public class JsonReader implements Closeable {
   }
 
   /**
-   * Returns the current peeked token. If no token has been computed yet,
-   * this method triggers the computation using {@link #doPeek()}.
+   * Returns the current peeked token. If no token has been computed yet, this method triggers the
+   * computation using {@link #doPeek()}.
    *
-   * <p>This method centralizes the common pattern used in multiple methods
-   * (e.g., nextInt, nextLong, nextDouble, peek), avoiding code duplication.
+   * <p>This method centralizes the common pattern used in multiple methods (e.g., nextInt,
+   * nextLong, nextDouble, peek), avoiding code duplication.
    *
    * @return the current token type
    * @throws IOException if an I/O error occurs while reading the input
@@ -1358,7 +1358,7 @@ public class JsonReader implements Closeable {
       result = (int) asDouble;
       if (result != asDouble) {
         throw new NumberFormatException(
-                "Expected an int but was " + numberAsString + locationString());
+            "Expected an int but was " + numberAsString + locationString());
       }
     }
 

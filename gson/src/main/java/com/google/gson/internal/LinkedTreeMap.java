@@ -330,12 +330,12 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
   }
 
   /**
-   * Rebalances the tree by performing any necessary AVL rotations
-   * between the newly unbalanced node and the root.
+   * Rebalances the tree by performing any necessary AVL rotations between the newly unbalanced node
+   * and the root.
    *
    * @param unbalanced the node from which rebalancing starts
-   * @param insert {@code true} if the imbalance was caused by an insertion,
-   *     {@code false} if it was caused by a removal
+   * @param insert {@code true} if the imbalance was caused by an insertion, {@code false} if it was
+   *     caused by a removal
    */
   private void rebalance(Node<K, V> unbalanced, boolean insert) {
     for (Node<K, V> node = unbalanced; node != null; node = node.parent) {
@@ -493,7 +493,6 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
     return result;
   }
 
-
   class EntrySet extends AbstractSet<Entry<K, V>> {
     @Override
     public int size() {
@@ -582,8 +581,7 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
     throw new InvalidObjectException("Deserialization is unsupported");
   }
 
-
-static final class Node<K, V> implements Entry<K, V> {
+  static final class Node<K, V> implements Entry<K, V> {
     Node<K, V> parent;
     Node<K, V> left;
     Node<K, V> right;

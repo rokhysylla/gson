@@ -405,8 +405,8 @@ public class GsonBuilderTest {
   }
 
   /**
-   * Asserts that the given action throws an {@link IllegalArgumentException}
-   * with the expected message.
+   * Asserts that the given action throws an {@link IllegalArgumentException} with the expected
+   * message.
    *
    * @param action the tested action
    * @param expectedMessage the expected exception message

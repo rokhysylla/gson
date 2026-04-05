@@ -115,7 +115,8 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    * @since 2.4
    */
   public void add(String string) {
-    elements.add(JsonElementConversion.toJsonElement(string));  }
+    elements.add(JsonElementConversion.toJsonElement(string));
+  }
 
   /**
    * Adds the specified element to self.
@@ -145,7 +146,8 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
    */
   @CanIgnoreReturnValue
   public JsonElement set(int index, JsonElement element) {
-    return elements.set(index, JsonElementConversion.nonNull(element));  }
+    return elements.set(index, JsonElementConversion.nonNull(element));
+  }
 
   /**
    * Removes the first occurrence of the specified element from this array, if it is present. If the

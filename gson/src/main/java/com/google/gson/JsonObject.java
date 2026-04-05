@@ -113,7 +113,8 @@ public final class JsonObject extends JsonElement {
    * @param value the boolean value associated with the member.
    */
   public void addProperty(String property, Boolean value) {
-    add(property, JsonElementConversion.toJsonElement(value));  }
+    add(property, JsonElementConversion.toJsonElement(value));
+  }
 
   /**
    * Convenience method to add a char member. The specified value is converted to a {@link
@@ -123,7 +124,8 @@ public final class JsonObject extends JsonElement {
    * @param value the char value associated with the member.
    */
   public void addProperty(String property, Character value) {
-    add(property, JsonElementConversion.toJsonElement(value));  }
+    add(property, JsonElementConversion.toJsonElement(value));
+  }
 
   /**
    * Returns a set of members of this object. The set is ordered, and the order is in which the

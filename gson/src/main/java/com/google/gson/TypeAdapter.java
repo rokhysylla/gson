@@ -16,15 +16,11 @@
 
 package com.google.gson;
 
-import com.google.gson.internal.Streams;
-import com.google.gson.internal.bind.JsonTreeReader;
-import com.google.gson.internal.bind.JsonTreeWriter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 
 /**
@@ -98,7 +94,6 @@ import java.io.Writer;
  *
  * @since 2.1
  */
-
 public abstract class TypeAdapter<T> {
 
   public TypeAdapter() {}
@@ -161,7 +156,6 @@ public abstract class TypeAdapter<T> {
     return TypeAdapterSupport.toJsonTree(this, value);
   }
 
-
   /**
    * Converts the JSON document in {@code in} to a Java object.
    *
@@ -195,7 +189,8 @@ public abstract class TypeAdapter<T> {
    * @since 2.2
    */
   public final T fromJson(String json) throws IOException {
-    return TypeAdapterSupport.fromJson(this, json);  }
+    return TypeAdapterSupport.fromJson(this, json);
+  }
 
   /**
    * Converts {@code jsonTree} to a Java object.

@@ -114,13 +114,6 @@ public class PerformanceTest {
     }
   }
 
-    List<CollectionEntry> list = new ArrayList<>(count);
-    for (int i = 0; i < count; ++i) {
-      list.add(new CollectionEntry("name" + i, "value" + i));
-    }
-    String unused = gson.toJson(list);
-  }
-
   /** Created in response to http://code.google.com/p/google-gson/issues/detail?id=96 */
   @Test
   @Ignore
@@ -361,4 +354,3 @@ public class PerformanceTest {
     }
   }
 }
-

@@ -211,16 +211,16 @@ public abstract class JsonElement {
     throw new IllegalStateException("Not a JSON Null: " + this);
   }
 
-
   /**
-   * Creates an exception indicating that the current JSON element
-   * does not support the requested conversion.
+   * Creates an exception indicating that the current JSON element does not support the requested
+   * conversion.
    *
    * @return an UnsupportedOperationException for the current element type
    */
   private UnsupportedOperationException unsupportedConversion() {
     return new UnsupportedOperationException(getClass().getSimpleName());
   }
+
   /**
    * Convenience method to get this element as a boolean value.
    *

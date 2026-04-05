@@ -65,7 +65,6 @@ public abstract class UnsafeAllocator {
       // OK: try the next way
     }
 
-
     try {
       Method getConstructorId =
           ObjectStreamClass.class.getDeclaredMethod("getConstructorId", Class.class);
@@ -85,7 +84,6 @@ public abstract class UnsafeAllocator {
     } catch (Exception ignored) {
       // OK: try the next way
     }
-
 
     try {
       Method newInstance =

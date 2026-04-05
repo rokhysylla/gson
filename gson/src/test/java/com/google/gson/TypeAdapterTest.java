@@ -24,7 +24,6 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-
 import org.junit.Test;
 
 public class TypeAdapterTest {
@@ -127,22 +126,25 @@ public class TypeAdapterTest {
   public void testFromJson_String_TrailingData() throws IOException {
     assertThat(adapter.fromJson("\"a\"1")).isEqualTo("a");
   }
+
   @Test
   public void testToJson_Writer() throws IOException {
-      StringWriter writer = new StringWriter();
+    StringWriter writer = new StringWriter();
 
-      adapter.toJson(writer, "abc");
+    adapter.toJson(writer, "abc");
 
-      assertThat(writer.toString()).isEqualTo("\"abc\"");
+    assertThat(writer.toString()).isEqualTo("\"abc\"");
   }
+
   @Test
   public void testToJsonTree() {
-      JsonElement jsonTree = adapter.toJsonTree("abc");
+    JsonElement jsonTree = adapter.toJsonTree("abc");
 
-      assertThat(jsonTree).isEqualTo(new JsonPrimitive("abc"));
+    assertThat(jsonTree).isEqualTo(new JsonPrimitive("abc"));
   }
+
   @Test
   public void testFromJson_String() throws IOException {
-      assertThat(adapter.fromJson("\"abc\"")).isEqualTo("abc");
+    assertThat(adapter.fromJson("\"abc\"")).isEqualTo("abc");
   }
 }
