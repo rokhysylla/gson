@@ -622,7 +622,66 @@ public final class Gson {
       throw new JsonIOException(e);
     }
   }
+  /**
+   * Stores the previous state of a {@link JsonWriter} so it can be restored
+   * after Gson temporarily applies its own configuration.
+   */
+  private static final class JsonWriterState {
+    final Strictness strictness;
+    final boolean htmlSafe;
+    final boolean serializeNulls;
 
+    JsonWriterState(Strictness strictness, boolean htmlSafe, boolean serializeNulls) {
+      this.strictness = strictness;
+      this.htmlSafe = htmlSafe;
+      this.serializeNulls = serializeNulls;
+    }
+  }
+  /**
+   * Applies this Gson instance's writer configuration to the given writer and
+   * returns the previous state so it can be restored later.
+   *
+   * @param writer the writer to configure
+   * @return the previous writer state
+   */
+  private JsonWriterState applyWriterSettings(JsonWriter writer) {
+    Strictness oldStrictness = writer.getStrictness();
+    boolean oldHtmlSafe = writer.isHtmlSafe();
+    boolean oldSerializeNulls = writer.getSerializeNulls();
+
+    if (this.strictness != null) {
+      writer.setStrictness(this.strictness);
+    } else if (writer.getStrictness() == Strictness.LEGACY_STRICT) {
+      writer.setStrictness(Strictness.LENIENT);
+    }
+
+    writer.setHtmlSafe(htmlSafe);
+    writer.setSerializeNulls(serializeNulls);
+
+    return new JsonWriterState(oldStrictness, oldHtmlSafe, oldSerializeNulls);
+  }
+  /**
+   * Restores a previously saved writer state.
+   *
+   * @param writer the writer to restore
+   * @param state the state to restore
+   */
+  private static void restoreWriterSettings(JsonWriter writer, JsonWriterState state) {
+    writer.setStrictness(state.strictness);
+    writer.setHtmlSafe(state.htmlSafe);
+    writer.setSerializeNulls(state.serializeNulls);
+  }
+
+  /**
+   * Creates a Gson-specific {@link AssertionError} enriched with the current Gson version.
+   *
+   * @param e the original assertion error
+   * @return the wrapped assertion error
+   */
+  private static AssertionError createGsonAssertionError(AssertionError e) {
+    return new AssertionError(
+            "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
+  }
   /**
    * Writes the JSON representation of {@code src} of type {@code typeOfSrc} to {@code writer}.
    *
@@ -648,30 +707,15 @@ public final class Gson {
     @SuppressWarnings("unchecked")
     TypeAdapter<Object> adapter = (TypeAdapter<Object>) getAdapter(TypeToken.get(typeOfSrc));
 
-    Strictness oldStrictness = writer.getStrictness();
-    if (this.strictness != null) {
-      writer.setStrictness(this.strictness);
-    } else if (writer.getStrictness() == Strictness.LEGACY_STRICT) {
-      // For backward compatibility change to LENIENT if writer has default strictness LEGACY_STRICT
-      writer.setStrictness(Strictness.LENIENT);
-    }
-
-    boolean oldHtmlSafe = writer.isHtmlSafe();
-    boolean oldSerializeNulls = writer.getSerializeNulls();
-
-    writer.setHtmlSafe(htmlSafe);
-    writer.setSerializeNulls(serializeNulls);
+    JsonWriterState oldState = applyWriterSettings(writer);
     try {
       adapter.write(writer, src);
     } catch (IOException e) {
       throw new JsonIOException(e);
     } catch (AssertionError e) {
-      throw new AssertionError(
-          "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
+      throw createGsonAssertionError(e);
     } finally {
-      writer.setStrictness(oldStrictness);
-      writer.setHtmlSafe(oldHtmlSafe);
-      writer.setSerializeNulls(oldSerializeNulls);
+      restoreWriterSettings(writer, oldState);
     }
   }
 
@@ -726,61 +770,16 @@ public final class Gson {
    * @throws JsonIOException if there was a problem writing to the writer
    */
   public void toJson(JsonElement jsonElement, JsonWriter writer) throws JsonIOException {
-    Strictness oldStrictness = writer.getStrictness();
-    boolean oldHtmlSafe = writer.isHtmlSafe();
-    boolean oldSerializeNulls = writer.getSerializeNulls();
-
-    writer.setHtmlSafe(htmlSafe);
-    writer.setSerializeNulls(serializeNulls);
-
-    if (this.strictness != null) {
-      writer.setStrictness(this.strictness);
-    } else if (writer.getStrictness() == Strictness.LEGACY_STRICT) {
-      // For backward compatibility change to LENIENT if writer has default strictness LEGACY_STRICT
-      writer.setStrictness(Strictness.LENIENT);
-    }
-
+    JsonWriterState oldState = applyWriterSettings(writer);
     try {
       Streams.write(jsonElement, writer);
     } catch (IOException e) {
       throw new JsonIOException(e);
     } catch (AssertionError e) {
-      throw new AssertionError(
-          "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
+      throw createGsonAssertionError(e);
     } finally {
-      writer.setStrictness(oldStrictness);
-      writer.setHtmlSafe(oldHtmlSafe);
-      writer.setSerializeNulls(oldSerializeNulls);
+      restoreWriterSettings(writer, oldState);
     }
-  }
-
-  /**
-   * Returns a new JSON writer configured for the settings on this Gson instance.
-   *
-   * <p>The following settings are considered:
-   *
-   * <ul>
-   *   <li>{@link GsonBuilder#disableHtmlEscaping()}
-   *   <li>{@link GsonBuilder#generateNonExecutableJson()}
-   *   <li>{@link GsonBuilder#serializeNulls()}
-   *   <li>{@link GsonBuilder#setStrictness(Strictness)}. If no {@linkplain
-   *       GsonBuilder#setStrictness(Strictness) explicit strictness has been set} the created
-   *       writer will have a strictness of {@link Strictness#LEGACY_STRICT}. Otherwise, the
-   *       strictness of the {@code Gson} instance will be used for the created writer.
-   *   <li>{@link GsonBuilder#setPrettyPrinting()}
-   *   <li>{@link GsonBuilder#setFormattingStyle(FormattingStyle)}
-   * </ul>
-   */
-  public JsonWriter newJsonWriter(Writer writer) throws IOException {
-    if (generateNonExecutableJson) {
-      writer.write(JSON_NON_EXECUTABLE_PREFIX);
-    }
-    JsonWriter jsonWriter = new JsonWriter(writer);
-    jsonWriter.setFormattingStyle(formattingStyle);
-    jsonWriter.setHtmlSafe(htmlSafe);
-    jsonWriter.setStrictness(strictness == null ? Strictness.LEGACY_STRICT : strictness);
-    jsonWriter.setSerializeNulls(serializeNulls);
-    return jsonWriter;
   }
 
   /**
