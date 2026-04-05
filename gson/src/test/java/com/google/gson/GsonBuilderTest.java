@@ -404,26 +404,26 @@ public class GsonBuilderTest {
     }
   }
 
+  /**
+   * Asserts that the given action throws an {@link IllegalArgumentException}
+   * with the expected message.
+   *
+   * @param action the tested action
+   * @param expectedMessage the expected exception message
+   */
+  private static void assertInvalidArgument(Runnable action, String expectedMessage) {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class, action::run);
+    assertThat(e).hasMessageThat().isEqualTo(expectedMessage);
+  }
+
   @SuppressWarnings("deprecation") // for GsonBuilder.setDateFormat(int)
   @Test
   public void testSetDateFormatInvalidStyle() {
     GsonBuilder builder = new GsonBuilder();
 
-    IllegalArgumentException e =
-        assertThrows(IllegalArgumentException.class, () -> builder.setDateFormat(-1));
-    assertThat(e).hasMessageThat().isEqualTo("Invalid style: -1");
-
-    e = assertThrows(IllegalArgumentException.class, () -> builder.setDateFormat(4));
-    assertThat(e).hasMessageThat().isEqualTo("Invalid style: 4");
-
-    e =
-        assertThrows(
-            IllegalArgumentException.class, () -> builder.setDateFormat(-1, DateFormat.FULL));
-    assertThat(e).hasMessageThat().isEqualTo("Invalid style: -1");
-
-    e =
-        assertThrows(
-            IllegalArgumentException.class, () -> builder.setDateFormat(DateFormat.FULL, -1));
-    assertThat(e).hasMessageThat().isEqualTo("Invalid style: -1");
+    assertInvalidArgument(() -> builder.setDateFormat(-1), "Invalid style: -1");
+    assertInvalidArgument(() -> builder.setDateFormat(4), "Invalid style: 4");
+    assertInvalidArgument(() -> builder.setDateFormat(-1, DateFormat.FULL), "Invalid style: -1");
+    assertInvalidArgument(() -> builder.setDateFormat(DateFormat.FULL, -1), "Invalid style: -1");
   }
 }
